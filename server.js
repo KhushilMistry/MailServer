@@ -12,8 +12,8 @@ var Strategy = require('passport-github').Strategy;
 // with a user object, which will be set at `req.user` in route handlers after
 // authentication.
 passport.use(new Strategy({
-    clientID: '70e2d1f49597e8974c26',
-    clientSecret: '    0b8ece3e859e44e48a051a7ff13a84ef484feeb9',
+    clientID: 'Iv1.2c25f6b5db9121be',
+    clientSecret: '101bc18ad084407c59030e2c5ea281926a7e44c3',
     callbackURL: 'https://da-woc.herokuapp.com/login/facebook/return'
   },
   function(accessToken, refreshToken, profile, cb) {
