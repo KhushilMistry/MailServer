@@ -94,6 +94,7 @@ app.get('/login/facebook/return',
   function(req, res) {
     console.log(req.user);
     res.redirect('http://localhost:3000/Github');
+    res.json({ user: req.user });
   });
 
 app.get('/profile',
