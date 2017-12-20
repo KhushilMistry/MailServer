@@ -66,6 +66,11 @@ app.use(passport.session());
 app.use(cors());
 
 app.use(function(req, res, next) {
+  req.header("Access-Control-Allow-Origin","*");
+  req.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  req.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE");
+  req.header("Access-Control-Expose-Headers",  "ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval");
+  req.header("Access-Control-Max-Age", "86400");
   res.header("Access-Control-Allow-Origin","*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE");
