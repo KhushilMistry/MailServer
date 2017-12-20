@@ -93,6 +93,12 @@ app.get('/login/facebook/return/:code',
     res.redirect('http://localhost:3000/Github',{ user: req.user });
   });
 
+app.get('/login/facebook/return',
+  passport.authenticate('github'),
+  function(req, res) {
+    res.redirect('http://localhost:3000/Github',{ user: req.user });
+  });
+
 app.get('/profile',
   require('connect-ensure-login').ensureLoggedIn(),
   function(req, res){
