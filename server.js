@@ -67,9 +67,9 @@ app.use(cors());
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin","*");
-  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE");
-  res.header("Access-Control-Expose-Headers",  "*");
+  res.header("Access-Control-Expose-Headers",  "ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval");
   res.header("Access-Control-Max-Age", "86400");
   next();
 });
