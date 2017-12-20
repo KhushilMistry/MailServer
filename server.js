@@ -1,6 +1,7 @@
 var express = require('express');
 var passport = require('passport');
-var Strategy = require('passport-facebook').Strategy;
+var cors = require('cors');
+var Strategy = require('passport-github').Strategy;
 
 
 // Configure the Facebook strategy for use by Passport.
@@ -11,8 +12,8 @@ var Strategy = require('passport-facebook').Strategy;
 // with a user object, which will be set at `req.user` in route handlers after
 // authentication.
 passport.use(new Strategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
+    clientID: '9071501ffa80c2c1693e',
+    clientSecret: 'f46dce2a34c3a9d332910927f5017182b4f1dae8',
     callbackURL: 'http://localhost:3000/login/facebook/return'
   },
   function(accessToken, refreshToken, profile, cb) {
@@ -62,6 +63,17 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveU
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(cors());
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin","*");
+  res.header("Access-Control-Allow-Headers", "Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-GitHub-OTP, X-Requested-With");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE");
+  res.header("Access-Control-Expose-Headers",  "ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval");
+  res.header("Access-Control-Max-Age", "86400");
+  next();
+});
+
 
 // Define routes.
 app.get('/',
@@ -75,12 +87,12 @@ app.get('/login',
   });
 
 app.get('/login/facebook',
-  passport.authenticate('facebook'));
+  passport.authenticate('github'));
 
 app.get('/login/facebook/return', 
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  passport.authenticate('github'),
   function(req, res) {
-    res.redirect('/');
+    res.json();
   });
 
 app.get('/profile',
