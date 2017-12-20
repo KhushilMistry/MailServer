@@ -93,8 +93,8 @@ app.get('/login/facebook/return',
   passport.authenticate('github'),
   function(req, res) {
     console.log(req.user);
-    res.redirect('http://localhost:3000/Github');
     res.json({ user: req.user });
+    res.redirect('http://localhost:3000/Github');
   });
 
 app.get('/profile',
