@@ -87,8 +87,7 @@ app.get('/login',
 app.get('/login/facebook',
   passport.authenticate('github'));
 
-app.get('/login/facebook/return', 
-  passport.authenticate('github'),
+app.get('/login/facebook/return',
   function(req, res) {
     res.json({ user: req.user });
   });
