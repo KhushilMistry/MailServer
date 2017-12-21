@@ -112,7 +112,7 @@ app.post('/github',
         });
       }
     ], function(error, result){
-      res.json(result[0].data.results);
+      res.json(result);
     });
   });
 
