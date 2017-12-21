@@ -2,6 +2,8 @@ var express = require('express');
 var passport = require('passport');
 var cors = require('cors');
 var Strategy = require('passport-github').Strategy;
+const axios = require('axios');
+const async = require('async');
 
 
 // Configure the Facebook strategy for use by Passport.
@@ -93,6 +95,25 @@ app.get('/login/facebook/return',
   passport.authenticate('github'),
   function(req, res) {
     res.redirect('http://localhost:3000/Github');
+  });
+
+app.post('/github',
+  function(req, res, next){
+    const query = req.query;
+
+    async.parallel([
+      function(callback){
+        axios({
+          method: 'post',
+          url: 'http://www.coursesdb.com/search.php',
+          params: query
+        }).then(function(response){
+          callback(false, response);
+        });
+      }
+    ], function(error, result){
+      res.json(result[0].data.results);
+    });
   });
 
 app.get('/profile',
