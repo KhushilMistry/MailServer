@@ -1,74 +1,35 @@
 var express = require('express');
 var passport = require('passport');
 var cors = require('cors');
-var Strategy = require('passport-github').Strategy;
+var mongoose = require('mongoose');
 const axios = require('axios');
 const async = require('async');
+var curl = require('curlrequest');
+var User = require('./model/user');
+var Project = require('./model/project');
 
-
-// Configure the Facebook strategy for use by Passport.
-//
-// OAuth 2.0-based strategies require a `verify` function which receives the
-// credential (`accessToken`) for accessing the Facebook API on the user's
-// behalf, along with the user's profile.  The function must invoke `cb`
-// with a user object, which will be set at `req.user` in route handlers after
-// authentication.
-passport.use(new Strategy({
-    clientID: 'Iv1.2c25f6b5db9121be',
-    clientSecret: '101bc18ad084407c59030e2c5ea281926a7e44c3',
-    callbackURL: 'https://da-woc.herokuapp.com/login/facebook/return'
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    // In this example, the user's Facebook profile is supplied as the user
-    // record.  In a production-quality application, the Facebook profile should
-    // be associated with a user record in the application's database, which
-    // allows for account linking and authentication with other identity
-    // providers.
-    return cb(null, profile);
-  }));
-
-
-// Configure Passport authenticated session persistence.
-//
-// In order to restore authentication state across HTTP requests, Passport needs
-// to serialize users into and deserialize users out of the session.  In a
-// production-quality application, this would typically be as simple as
-// supplying the user ID when serializing, and querying the user record by ID
-// from the database when deserializing.  However, due to the fact that this
-// example does not have a database, the complete Facebook profile is serialized
-// and deserialized.
-passport.serializeUser(function(user, cb) {
-  cb(null, user);
-});
-
-passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
-});
-
-
-// Create a new Express application.
 var app = express();
 
-// Configure view engine to render EJS templates.
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://KhushilMistry:sinchanisheretohelp123@ds231315.mlab.com:31315/interview_experience');
+
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-// Use application-level middleware for common functionality, including
-// logging, parsing, and session handling.
+
 app.use(require('morgan')('combined'));
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
 
-// Initialize Passport and restore authentication state, if any, from the
-// session.
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(cors());
 
 app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin','*');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
   res.setHeader("Access-Control-Allow-Headers", "X-ACCESS_TOKEN, Access-Control-Allow-Origin, Authorization, Origin, x-requested-with, Content-Type, Content-Range, Content-Disposition, Content-Description");
@@ -76,50 +37,109 @@ app.use(function (req, res, next) {
 });
 
 
-// Define routes.
-app.get('/',
-  function(req, res) {
-    res.render('home', { user: req.user });
-  });
-
-app.get('/login',
-  function(req, res){
-    res.render('login');
-  });
-
-app.get('/login/facebook',
-  passport.authenticate('github'));
-
-
-app.get('/login/facebook/return',
-  passport.authenticate('github'),
-  function(req, res) {
-    res.redirect('http://localhost:3000/Github');
-  });
-
 app.post('/github',
-  function(req, res, next){
-    const query = req.query;
-
+  function (req, res, next) {
+    const data1 = req.query;
+    console.log(req.query);
+    const data = {
+      code: data1[0],
+      client_id: 'Iv1.2c25f6b5db9121be',
+      client_secret: '101bc18ad084407c59030e2c5ea281926a7e44c3',
+    }
     async.parallel([
-      function(callback){
+      function (callback) {
         axios({
           method: 'post',
-          url: 'http://www.coursesdb.com/search.php',
-          params: query
-        }).then(function(response){
+          url: 'https://github.com/login/oauth/access_token',
+          params: data
+        }).then(function (response) {
           callback(false, response);
         });
       }
-    ], function(error, result){
-      res.json(result);
+    ], function (error, result) {
+      res.json(result[0].data);
     });
   });
 
-app.get('/profile',
-  require('connect-ensure-login').ensureLoggedIn(),
-  function(req, res){
-    res.render('profile', { user: req.user });
+app.post('/user',
+  function (req, res, next) {
+    const data = req.query[0];
+    const url = 'https://api.github.com/user?' + data;
+    var options = {
+      url: url
+    };
+    curl.request(options, function (err, resp) {
+      if (err) {
+        console.log(err);
+      }
+      var response = JSON.parse(resp);
+      User.findOne({ 'id': response.id }, function (err, user) {
+        if (err)
+          res.json(err);
+        if (user) {
+          Project.find({}, function (err, projects) {
+            res.json({ user: user, projects : projects });
+          });
+        } else {
+          var newUser = new User();
+          newUser.id = response.id;
+          newUser.username = response.login;
+          newUser.name = response.name;
+          newUser.email = response.email;
+          newUser.image = response.avatar_url;
+          newUser.repos = response.repos_url;
+
+          // save our user into the database
+          newUser.save(function (err) {
+            if (err)
+              throw err;
+          }).then(function () {
+            Project.find({}, function (err, projects) {
+              res.json({ user: newUser, projects : projects });
+            });
+          });
+        }
+      });
+    });
+
+
   });
+
+app.post('/admin', function (req, res, next) {
+  if (req.query.email === 'dscdaiict' && req.query.password === 'muthuda11ct') {
+    User.find({}, function (err, users) {
+      console.log(users);
+      Project.find({}, function (err, projects) {
+        res.json({ admin: true, users: users, projects : projects });
+      });
+    });
+  }
+  else {
+    res.json({ admin: false, users: '' });
+  }
+
+});
+
+app.post('/project', function (req, res, next) {
+  console.log('Hello');
+  var newProject = new Project();
+  newProject.name = req.query.name;
+  newProject.desc = req.query.desc;
+  newProject.mentor = req.query.mentor;
+  newProject.language = req.query.language;
+  newProject.link = req.query.link;
+
+  // save our user into the database
+  newProject.save(function (err) {
+    if (err)
+      throw err;
+  }).then(function () {
+    console.log('Here !');
+    Project.find({}, function (err, projects) {
+      res.json({ projects : projects });
+    });
+  });
+
+});
 
 app.listen(process.env.PORT || 3000)
