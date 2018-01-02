@@ -26,9 +26,10 @@ app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveU
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(cors());
 
 app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://dawoc.herokuapp.com/');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
   res.setHeader("Access-Control-Allow-Headers", "X-ACCESS_TOKEN, Access-Control-Allow-Origin, Authorization, Origin, x-requested-with, Content-Type, Content-Range, Content-Disposition, Content-Description");
