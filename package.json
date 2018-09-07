@@ -24,6 +24,7 @@
     "express": "^4.13.1",
     "express-session": "^1.11.3",
     "morgan": "^1.6.1",
-    "nodemailer": "^4.6.8"
+    "nodemailer": "^4.6.8",
+    "nodemailer-smtp-transport": "^2.7.4"
   }
 }
