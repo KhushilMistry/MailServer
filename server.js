@@ -35,7 +35,7 @@ app.post('/mail-confirmation',
     var mailOptions = {
       from: 'noreply.concours2018@gmail.com',
       to: req.query.email,
-      subject: "Concoours'18 Registration Confirmation" ,
+      subject: "[Concours 2018] Registration confirmation" ,
       text: req.query.text
     };
     
